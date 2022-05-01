@@ -328,10 +328,17 @@ res
 # # Null hypothesis (Ho) - Old peak value is same for 4 types of chest pain
 # Alternative hypothesis (Ha)- Old peak value is significantly different as per Chest Pain .
 # Ha can be restated that true difference in means between group 0 and group 1 is less than 0, i.e. u0<u1
-# Hypothesis test-  One tailed T-test
+# Hypothesis test-  Kruskal Wallis Test (3+ independent group)
+
+ggboxplot(heart_data1, x = "cp", y = "oldpeak", 
+          color = "cp", palette = NULL,
+          ylab = "Old Peak", xlab = "Target")
 
 res <- kruskal.test(oldpeak ~ cp, data = heart_data1)
 res
+
+
+# P value is less than 0.05, hence alternate hypothesis is true
 # old peak has significant effect on type of chest pain
 
 #  study of categorical data
@@ -354,6 +361,12 @@ barplot( prop.table(chestpain,
 # its learnt that non anginal pain has can lead to major chances in heart attack
 
 # -------- hypothesis 6 using chi square test-----------
+
+# To verify if the type of chest pain and heart attack chances has any significant relationship
+# Null hypothesis (Ho) - No significant relationship between chest pain type and chances of heart attack
+# Alternative hypothesis (Ha)- There is significant relationship between chest pain type and chances of heart attack
+# Hypothesis test-  Chi-Square Test (2 dependent variable is categorical)
+
 chestpain
 res <- chisq.test(heart_data1$cp, heart_data1$output, correct=FALSE)
 res
