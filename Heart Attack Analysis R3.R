@@ -130,7 +130,7 @@ shapiro.test(heart_data$oldpeak)
 unique(heart_data$chol, descending = TRUE)
 
 hist(heart_data$chol, 
-     main = "Histogram for Cholestrol", 
+     main = "Histogram for Cholestrol before removing outlier", 
      xlab = "Cholestrol in mg/dl", 
      col = "red")
 
@@ -141,7 +141,7 @@ heart_data1$cholnew[heart_data1$chol <= 500] <- "OK"
 
 sum(is.na(heart_data1$cholnew))
 
-# Only 1 value in the dataset for cholestrol reading as 564 after the reading 417 
+# Only 1 value in the dataset for cholestrol reading as 564mg/dl after the reading 417mg/dl 
 # from all readings. Clearly its an outlier and need to be removed (refer histogram). 
 # This might improve the chances of making it a normal distribution
 
@@ -149,8 +149,8 @@ heart_data1 <- na.omit(heart_data1)
 nrow(heart_data1)
 
 hist(heart_data1$chol, 
-     main = "Cholestrol in mg/dl", 
-     xlab = "Patients", 
+     main = "Histogram for cholesterol after removing outlier", 
+     xlab = "cholesterol in mg/dl", 
      col = "blue")
 # No outliers, lets check the p value using Shapiro Wilk test for Cholestrol
 
@@ -159,7 +159,7 @@ shapiro.test((heart_data1$chol))
 # P value = 0.00109, less than 0.05. Hence data is still not Normal but still very close 
 # to it as per Shapiro test. 
 # Due to slight right skew, it still cannot be considered as normal distribution
-# Does there is a need to apply transformation on all 4 paremeters and again 
+# Does there is a need to apply transformation on all 4 parameters and again 
 # test for normality
 
 # https://www.datanovia.com/en/lessons/transform-data-to-normal-distribution-in-r/
@@ -228,7 +228,7 @@ heart_data1$thalachhtrans <- sqrt(max(heart_data1$thalachh + 1)- heart_data1$tha
 
 ggdensity(heart_data1, 
           x = "thalachhtrans", 
-          fill = "lightgray", title = "maximum heart rate") +
+          fill = "lightgray", title = "maximum heart rate after transformation") +
   stat_overlay_normal_density(color = "red", 
                               linetype = "dashed")
 
@@ -245,11 +245,11 @@ shapiro.test((heart_data1$thalachhtrans))
 # ---------------Hypothesis 1------------------------------
 # Research Question- To verify if the cholesterol level is different for men and women
 # Null hypothesis (Ho) - No difference in cholesterol between men and women
-# Alternative hypothesis (Ha)- There is significant difference between cholesterol
+# Alternative hypothesis (H1)- There is significant difference between cholesterol
 # level between men and women
 # Transformed cholesterol value is continuous data
 # Sex column is categorical. Hence needs to be converted
-
+  
 heart_data1$sex_transform <- factor(heart_data1$sex, labels = c("Female", "Male"))
 
 attach(heart_data1)
@@ -299,10 +299,7 @@ with(heart_data1, {
   qqline(choltrans[sex_transform == "Male"])
 })
 
-# And we can change for active period
-# = "yes"
-# "yes" occurrences seem to be more 
-# normally distributed than the "no" answers
+
 with(heart_data1, {
   qqnorm(choltrans[sex_transform == "Female"], 
          main = "Female cholesterol level")
@@ -333,13 +330,13 @@ res
 # There is significant difference between cholesterol level between men and women
 
 #-------- hypothesis 2------------
-# Research Question- Verify if the cholesterol level has any significant impact on heart attack?
+# Research Question- Verify if high cholesterol level increase chances heart attack?
 # The target values suggest 0- less chance of heart attack 1- more chance of heart attack
 # Null hypothesis (Ho) - Cholesterol level does not impact chances of heart attack
-# Alternative hypothesis (Ha)- More cholesterol will lead to more chances in heart attack.
+# Alternative hypothesis (H1)- More cholesterol will lead to more chances in heart attack.
 # Ha can be restated that true difference in means between 2 group, i.e. u0<u1
 
-heart_data1$output_transform <- factor(heart_data1$sex, labels = c("Less Chances", "More Chances"))
+heart_data1$output_transform <- factor(heart_data1$output, labels = c("Less Chances", "More Chances"))
 
 attach(heart_data1)
 plot(output_transform, choltrans, pch = 19, col = "lightblue")
@@ -396,7 +393,7 @@ with(heart_data1, {
 # normally distributed than the "no" answers
 with(heart_data1, {
   qqnorm(choltrans[output_transform == "More Chances"], 
-         main = "cholesterol level (more chances")
+         main = "cholesterol level (more chances)")
   qqline(choltrans[output_transform == "More Chances"])
 })
 
@@ -414,18 +411,21 @@ shapiro.test(heart_data1$choltrans)
 # choltrans is a normally distributed data, hence parametric test
 # Hypothesis test-  One tailed T-test
 # One tailed is because, alternate hypothesis is to prove whether more cholesterol can lead to higher chances in heart attack 
-# Mean (less chances) < Mean (more chances)
+# Mean (more chances) > Mean (less chances)
+help(t.test)
 
-res <- t.test(choltrans ~ output, data = heart_data1, var.equal = TRUE, alternative = "less")
+res <- t.test(choltrans ~ output, data = heart_data1, var.equal = TRUE, alternative = "greater")
 res
-# p value is 0.9706 hence, null hypothesis is true. Cholesterol is not
-# impacting more or less chances for heart attack as per data
+# The 2-sample t-test describes the p-value to be 0.02944 which is less than 0.05, 
+# the research state that alternate hypothesis is true. 
+#There is a statistical significance between more value of cholesterol level
+# impacting chances of heart attack.
 
 #------------------- hypothesis 3-----------------
 # Research Question- Verify if the Blood Pressure level has any significant impact on heart attack?
 # The target values suggest 0- less chance of heart attack 1- more chance of heart attack
 # Null hypothesis (Ho) - Blood Pressure level does not impact chances of heart attack
-# Alternative hypothesis (Ha)- More Blood Pressure will lead to more chances in heart attack.
+# Alternative hypothesis (H1)- Blood pressure has significant impact on chances of heart attack.
 # Ha can be restated that true difference in means between 2 group, i.e. u0<u1
 
 group_by(heart_data1, output_transform) %>%
@@ -481,20 +481,23 @@ with(heart_data1, tapply(trtbps, output_transform, shapiro.test))
 shapiro.test(heart_data1$trtbps)
 
 # Blood Pressure value is a normally distributed data, hence non-parametric test
-# Hypothesis test-  Wilcoxin- Mann Whitney Test
+# Hypothesis test-  Wilcoxon- Mann Whitney Test
 
-res <- wilcox.test(trtbps ~ output_transform, data = heart_data1)
+res <- wilcox.test(trtbps ~ output_transform, data = heart_data1, 
+                   alternative = "two.sided")
 res
 
-# p value is 0.305, hence null hypothesis is true. Blood Pressure is indicating
-# significant impacting in more or less chances for heart attack as per data
+
+# p value is 0.0395, p value > 0.025 (two tailed) hence null hypothesis is true. 
+# Blood Pressure is indicating not having significant impact
+# in causing more or less chances for heart attack as per data
 
 
-#----------------hypothesis 4----------------
+#--------------------hypothesis 4-----------------------
 
 # Research Question-  verify if the maximum heart rate level is different as per age category
 # Null hypothesis (Ho) - No difference in maximum heart rate level at any age group
-# Alternative hypothesis (Ha)- There is significant difference between maximum heart rate
+# Alternative hypothesis (H1)- There is significant difference between maximum heart rate
 # level among various age group
 
 group_by(heart_data1, AgeCatgory) %>%
@@ -509,7 +512,7 @@ ggboxplot(heart_data1, x = "AgeCatgory", y = "thalachhtrans",
           color = "AgeCatgory", 
           ylab = "Maximum Heart Rate", xlab = "Age Category")
 
-# The box plots indicates that there is very less difference among mean values
+# The box plots indicates that there is significant difference among mean values
 
 # plotting histogram of categorical data
 
@@ -567,12 +570,34 @@ summary(aov(thalachhtrans ~ AgeCatgory, data = heart_data1))
 # p value is 0.0000...., hence alternate hypothesis is true. max heart rate 
 # has significant difference among different age categories
 
+par(opar)
+
 # -------- hypothesis 5 using chi square test-----------
 
 # To verify if the type of chest pain and heart attack chances has any significant relationship
 # Null hypothesis (Ho) - No significant relationship between chest pain type and chances of heart attack
-# Alternative hypothesis (Ha)- There is significant relationship between chest pain type and chances of heart attack
+# Alternative hypothesis (H1)- There is significant relationship between chest pain type and chances of heart attack
 # Hypothesis test-  Chi-Square Test (2 dependent variable is categorical)
+
+heart_data1$cp_transform <- factor(heart_data1$cp, labels = c("typical angina",
+                                                              "atypical angina",
+                                                              "non-anginal pain", 
+                                                              "asymptomatic"))
+
+chestpain <-  table(heart_data1$cp_transform,heart_data1$output_transform)
+prop.table((chestpain))
+addmargins(chestpain)
+
+addmargins(prop.table(chestpain,
+                      margin = 2))
+
+
+barplot( prop.table(chestpain,
+                    margin = 2),
+         legend.text = TRUE,
+         ylab = "Proportion as per chest pain",
+         xlab = "chances of heart attack"
+)
 
 res <- chisq.test(heart_data1$cp, heart_data1$output, correct=FALSE)
 res
