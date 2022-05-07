@@ -414,7 +414,7 @@ shapiro.test(heart_data1$choltrans)
 # Mean (more chances) > Mean (less chances)
 help(t.test)
 
-res <- t.test(choltrans ~ output, data = heart_data1, var.equal = TRUE, alternative = "greater")
+res <- t.test(choltrans ~ output, data = heart_data1, var.equal = TRUE, alternative = "less")
 res
 # The 2-sample t-test describes the p-value to be 0.02944 which is less than 0.05, 
 # the research state that alternate hypothesis is true. 
@@ -599,7 +599,7 @@ barplot( prop.table(chestpain,
          xlab = "chances of heart attack"
 )
 
-res <- chisq.test(heart_data1$cp, heart_data1$output, correct=FALSE)
+res <- chisq.test(heart_data1$cp_transform, heart_data1$output_transform, correct=FALSE)
 res
 # since p value is 2x10^-16 which is very less than 0.05, it indicates that chest pain have significant
 # relationship with heart attack
