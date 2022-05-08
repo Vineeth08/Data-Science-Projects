@@ -604,3 +604,22 @@ res
 # since p value is 2x10^-16 which is very less than 0.05, it indicates that chest pain have significant
 # relationship with heart attack
 
+# --------------- hypothesis 6 -----------------
+# To verify if there is any relation between blood pressure and maximum heart rate
+# Null hypothesis (Ho) - No significant relationship between blood pressure and maximum heart rate
+# Alternative hypothesis (H1)- There is significant relationship between blood pressure and heart rate
+# Transformed maximum heart rate is dependent variable and blood pressure is independent variable
+# Transformed Maximum heart rate is normally distributed
+# Blood pressure is not normally distributed as seen above.  
+# Hypothesis test-  Spearman's correlation coefficient
+
+attach(heart_data1)
+plot(trtbps, thalachhtrans, main="Scatterplot for maximum heart rate vs blood pressure",
+     xlab="Blood Pressure ", ylab="Maximum heart rate ", pch=19)
+
+cor.test(heart_data1$trtbps, heart_data1$thalachhtrans, method = "pearson")
+
+
+
+
+
