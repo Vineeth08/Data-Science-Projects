@@ -3,7 +3,9 @@ heart_data
 
 str(heart_data)
 
-describe(heart_data)
+data_summary <- data.frame(describe(heart_data))
+data_summary
+
 # Finding out the total NA values in the dataframe.
 sum(is.na(heart_data))
 na_count <- heart_data[!complete.cases(heart_data),]
@@ -178,6 +180,7 @@ nrow(heart_data)
 
 # No need to remove outliers as variance among values are very less
 
+#-----------------XXXXXXXX-----------------------------
 
 # Assumption 2. Check linearity in logit for independent variables
 # The logit is the logarithm of the odds ratio, 
@@ -201,6 +204,10 @@ boxTidwell(`Chances_of_Heart Attack` ~ `Resting_BP`, data=heart_data)
 # Hence both variables are linearly related
 
 boxTidwell(`Chances_of_Heart Attack` ~ Cholesterol, data=heart_data)
+# p-value is 0.97 which is more than 0.05. If p > 0.05, linear relation exists
+# Hence both variables are linearly related
+
+#----------------------xxxxxxx----------------------------------
 
 # Assumption 3. Absence of Multicollinearity
 # Multicollinearity will be checked once the model is fit to estimate VIF values
@@ -302,22 +309,34 @@ correlation_accuracy <- cor(actuals_predictions)
 correlation_accuracy
 
 fitted.results <- predict(model,testing_data,type='response')
-fitted.results <- ifelse(fitted.results > 0.5,1,0)
-head(fitted.results)
-fitted.results
+fitted.results1 <- ifelse(fitted.results > 0.5,1,0)
+head(fitted.results1)
+fitted.results1
 
 # Calculating accuracy and mean error
-misClasificError <- mean(fitted.results != testing_data$`Chances_of_Heart Attack`)
+misClasificError <- mean(fitted.results1 != testing_data$`Chances_of_Heart Attack`)
 misClasificError
 print(paste('Accuracy',1-misClasificError))
 # or accuracy can be described as follows (Accuracy is 0.8 or 80%)
-mean(fitted.results == testing_data$`Chances of Heart Attack`)
+mean(fitted.results1 == testing_data$`Chances_of_Heart Attack`)
+
+
+install.packages("pROC")
+library(pROC)
+plot(roc(testing_data$`Chances_of_Heart Attack`, fitted.results, direction="<"),
+     col="yellow", lwd=3, main="ROC curve for Chances of Heart Attack")
+
+auc(testing_data$`Chances_of_Heart Attack`, fitted.results)
+
+# Since the area under ROC curve is 0.91, which is closer to 1, the model
+# does a very good job in predicting heart attack chances.
+
 
 # ------------------------- Forecasting with multiple predictor values ---------------------------------
 coefficients(model)
 residuals(model)
 
-fitted.results <- data.frame(fitted.results)
+fitted.results <- data.frame(fitted.results1)
 nrow(fitted.results)
 
 
